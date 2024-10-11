@@ -1,7 +1,7 @@
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
-const path = require('path'); // Agregado para manejar rutas
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -12,21 +12,22 @@ const dbName = process.env.MONGODB_DB;
 app.use(cors());
 app.use(express.json());
 
-// Servir archivos estáticos del directorio 'frontend/public'
+// Servir archivos estáticos desde el directorio 'public'
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
 let db;
 let petsCollection;
 let ownersCollection;
 
+// Conectar a MongoDB
 MongoClient.connect(mongoUri, { useUnifiedTopology: true })
   .then(client => {
     console.log('Connected to MongoDB');
     db = client.db(dbName);
-    
+
     petsCollection = db.collection('pets');
     ownersCollection = db.collection('owners');
-    
+
     // Opcional: Crear índices
     petsCollection.createIndex({ name: 1 });
     ownersCollection.createIndex({ email: 1 }, { unique: true });
@@ -37,6 +38,11 @@ MongoClient.connect(mongoUri, { useUnifiedTopology: true })
 
     app.use('/api/pets', petsRoutes);
     app.use('/api/owners', ownersRoutes);
+
+    // Servir el archivo index.html en la raíz
+    app.get('/', (req, res) => {
+      res.sendFile(path.join(__dirname, '../frontend/public/index.html'));
+    });
 
     // Iniciar el servidor
     app.listen(port, () => {
