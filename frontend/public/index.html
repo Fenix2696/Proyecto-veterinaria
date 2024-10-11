@@ -4,14 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Veterinaria App</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css"> <!-- Enlace a la hoja de estilos -->
 </head>
 <body>
     <div id="app">
-        <!-- El contenido se cargará dinámicamente aquí -->
-        <h1>Bienvenido a la Veterinaria</h1>
-        <p>Esta aplicación te permite gestionar propietarios y mascotas.</p>
+        <!-- Formulario para agregar propietarios -->
+        <h2>Agregar Propietario</h2>
+        <form id="owner-form">
+            <input type="text" id="ownerName" placeholder="Nombre del propietario" required>
+            <input type="email" id="ownerEmail" placeholder="Email" required>
+            <button type="submit">Agregar Propietario</button>
+        </form>
+
+        <!-- Formulario para agregar mascotas -->
+        <h2>Agregar Mascota</h2>
+        <form id="pet-form">
+            <input type="text" id="petName" placeholder="Nombre de la mascota" required>
+            <input type="text" id="petOwnerId" placeholder="ID del propietario" required>
+            <button type="submit">Agregar Mascota</button>
+        </form>
+        
+        <!-- Contenido se cargará dinámicamente aquí -->
+        <div id="output"></div>
     </div>
-    <script src="../src/app.js" type="module"></script>
+    <script src="../src/app.js" type="module"></script> <!-- Asegúrate de que la ruta sea correcta -->
 </body>
 </html>

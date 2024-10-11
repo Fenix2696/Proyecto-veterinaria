@@ -1,5 +1,4 @@
-// Cambia esto a la URL de tu servicio en Render
-const API_URL = 'https://proyecto-veterinaria-uf7y.onrender.com';
+const API_URL = 'http://localhost:5000/api';
 
 // Obtener todos los propietarios
 export async function getOwners() {
@@ -56,6 +55,21 @@ export async function deleteOwner(ownerId) {
   });
   if (!response.ok) {
     throw new Error('Error deleting owner');
+  }
+  return response.json();
+}
+
+// Añadir un nuevo pet
+export async function addPet(petData) {
+  const response = await fetch(`${API_URL}/pets`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(petData),
+  });
+  if (!response.ok) {
+    throw new Error('Error adding pet');
   }
   return response.json();
 }

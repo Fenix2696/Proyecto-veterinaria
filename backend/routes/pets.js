@@ -4,7 +4,7 @@ const { ObjectId } = require('mongodb');
 module.exports = (petsCollection) => {
   const router = express.Router();
 
-  // Obtener todos los mascotas
+  // Obtener todas las mascotas
   router.get('/', async (req, res) => {
     try {
       const pets = await petsCollection.find().toArray();
