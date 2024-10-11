@@ -49,3 +49,7 @@ app.post('/api/items', async (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
+
+app.use((req, res) => {
+    res.status(404).send('Página no encontrada');
+  });
