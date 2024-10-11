@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:5000/api';
+// Cambia esto a la URL de tu servicio en Render
+const API_URL = 'https://tu-nombre-del-servicio.render.com/api';
 
 // Obtener todos los propietarios
 export async function getOwners() {
