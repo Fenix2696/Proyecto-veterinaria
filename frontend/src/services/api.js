@@ -1,5 +1,5 @@
 // Cambia esto a la URL de tu servicio en Render
-const API_URL = 'https://tu-nombre-del-servicio.render.com/api';
+const API_URL = 'https://proyecto-veterinaria-uf7y.onrender.com';
 
 // Obtener todos los propietarios
 export async function getOwners() {
