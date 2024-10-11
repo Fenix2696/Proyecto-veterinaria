@@ -43,6 +43,7 @@ module.exports = (petsCollection) => {
         { $set: req.body },
         { returnOriginal: false }
       );
+      if (!updatedPet.value) return res.status(404).json({ message: 'Mascota no encontrada' });
       res.json(updatedPet.value);
     } catch (error) {
       res.status(400).json({ message: error.message });
@@ -52,7 +53,8 @@ module.exports = (petsCollection) => {
   // Eliminar una mascota
   router.delete('/:id', async (req, res) => {
     try {
-      await petsCollection.deleteOne({ _id: ObjectId(req.params.id) });
+      const result = await petsCollection.deleteOne({ _id: ObjectId(req.params.id) });
+      if (result.deletedCount === 0) return res.status(404).json({ message: 'Mascota no encontrada' });
       res.json({ message: 'Mascota eliminada' });
     } catch (error) {
       res.status(500).json({ message: error.message });
