@@ -1,6 +1,7 @@
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
+const path = require('path'); // Agregado para manejar rutas
 require('dotenv').config();
 
 const app = express();
@@ -10,6 +11,9 @@ const dbName = process.env.MONGODB_DB;
 
 app.use(cors());
 app.use(express.json());
+
+// Servir archivos estáticos del directorio 'frontend/public'
+app.use(express.static(path.join(__dirname, '../frontend/public')));
 
 let db;
 let petsCollection;
