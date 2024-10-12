@@ -1,8 +1,150 @@
 import { getOwners, addOwner, deleteOwner, getPets, addPet, deletePet } from './services/api.js';
-import OwnerForm from './components/OwnerForm.js';
-import OwnerList from './components/OwnerList.js';
-import PetForm from './components/PetForm.js';
-import PetList from './components/PetList.js';
+
+class OwnerForm {
+    constructor(onSubmit) {
+        this.onSubmit = onSubmit;
+    }
+
+    render() {
+        return `
+            <h2>Agregar Propietario</h2>
+            <form id="owner-form">
+                <input type="text" id="owner-name" placeholder="Nombre del propietario" required>
+                <input type="email" id="owner-email" placeholder="Email del propietario" required>
+                <button type="submit">Agregar Propietario</button>
+            </form>
+        `;
+    }
+
+    setupListeners() {
+        const form = document.getElementById('owner-form');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('owner-name').value;
+            const email = document.getElementById('owner-email').value;
+            this.onSubmit({ name, email });
+            form.reset();
+        });
+    }
+}
+
+class OwnerList {
+    constructor(onDelete) {
+        this.onDelete = onDelete;
+        this.owners = [];
+    }
+
+    updateOwners(owners) {
+        this.owners = owners;
+    }
+
+    render() {
+        return `
+            <h2>Lista de Propietarios</h2>
+            <ul id="owner-list">
+                ${this.owners.map(owner => `
+                    <li>
+                        ${owner.name} (${owner.email})
+                        <button class="delete-owner" data-id="${owner._id}">Eliminar</button>
+                    </li>
+                `).join('')}
+            </ul>
+        `;
+    }
+
+    setupListeners() {
+        const list = document.getElementById('owner-list');
+        list.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-owner')) {
+                const ownerId = e.target.getAttribute('data-id');
+                this.onDelete(ownerId);
+            }
+        });
+    }
+}
+
+class PetForm {
+    constructor(onSubmit, owners) {
+        this.onSubmit = onSubmit;
+        this.owners = owners;
+    }
+
+    updateOwners(owners) {
+        this.owners = owners;
+    }
+
+    render() {
+        return `
+            <h2>Agregar Mascota</h2>
+            <form id="pet-form">
+                <input type="text" id="pet-name" placeholder="Nombre de la mascota" required>
+                <select id="pet-owner" required>
+                    <option value="">Seleccione un propietario</option>
+                    ${this.owners.map(owner => `
+                        <option value="${owner._id}">${owner.name}</option>
+                    `).join('')}
+                </select>
+                <button type="submit">Agregar Mascota</button>
+            </form>
+        `;
+    }
+
+    setupListeners() {
+        const form = document.getElementById('pet-form');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('pet-name').value;
+            const ownerId = document.getElementById('pet-owner').value;
+            this.onSubmit({ name, ownerId });
+            form.reset();
+        });
+    }
+}
+
+class PetList {
+    constructor(onDelete, owners) {
+        this.onDelete = onDelete;
+        this.pets = [];
+        this.owners = owners;
+    }
+
+    updatePets(pets) {
+        this.pets = pets;
+    }
+
+    updateOwners(owners) {
+        this.owners = owners;
+    }
+
+    getOwnerName(ownerId) {
+        const owner = this.owners.find(owner => owner._id === ownerId);
+        return owner ? owner.name : 'Propietario desconocido';
+    }
+
+    render() {
+        return `
+            <h2>Lista de Mascotas</h2>
+            <ul id="pet-list">
+                ${this.pets.map(pet => `
+                    <li>
+                        ${pet.name} (Dueño: ${this.getOwnerName(pet.ownerId)})
+                        <button class="delete-pet" data-id="${pet._id}">Eliminar</button>
+                    </li>
+                `).join('')}
+            </ul>
+        `;
+    }
+
+    setupListeners() {
+        const list = document.getElementById('pet-list');
+        list.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-pet')) {
+                const petId = e.target.getAttribute('data-id');
+                this.onDelete(petId);
+            }
+        });
+    }
+}
 
 class App {
     constructor() {

@@ -1,9 +1,21 @@
 {
+  "name": "veterinaria-proyecto",
+  "version": "1.0.0",
+  "description": "Proyecto completo de veterinaria",
+  "scripts": {
+    "start": "node backend/server.js",
+    "build": "cd frontend && npm install && npm run build",
+    "postinstall": "npm run build",
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm start\""
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "mongodb": "^6.9.0",
     "mongoose": "^8.7.1"
+  },
+  "devDependencies": {
+    "concurrently": "^6.2.0"
   }
 }
