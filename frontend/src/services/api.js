@@ -1,4 +1,4 @@
-const API_URL = '/https://proyecto-veterinaria-uf7y.onrender.com';
+const API_URL = 'https://proyecto-veterinaria-uf7y.onrender.com/api';
 
 export async function getOwners() {
     const response = await fetch(`${API_URL}/owners`);
