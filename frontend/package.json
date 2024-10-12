@@ -2,6 +2,7 @@
   "name": "veterinaria-frontend",
   "version": "1.0.0",
   "source": "public/index.html",
+  "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
     "start": "parcel public/index.html",
     "build": "parcel build public/index.html",

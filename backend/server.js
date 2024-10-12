@@ -24,11 +24,11 @@ MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true 
     const ownersCollection = db.collection('owners');
 
     // Importar y usar las rutas
-    const petsRoutes = require('./routes/pets')(petsCollection);
-    const ownersRoutes = require('./routes/owners')(ownersCollection);
+    const ownersRouter = require('./routes/owners')(ownersCollection);
+const petsRouter = require('./routes/pets')(petsCollection);
 
-    app.use('/api/pets', petsRoutes);
-    app.use('/api/owners', ownersRoutes);
+app.use('/api/owners', ownersRouter);
+app.use('/api/pets', petsRouter);
 
     // Manejar cualquier solicitud que no sea de la API
     app.get('*', (req, res) => {
