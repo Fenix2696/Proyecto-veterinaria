@@ -12,25 +12,16 @@ const dbName = process.env.MONGODB_DB;
 app.use(cors());
 app.use(express.json());
 
-// Servir archivos estáticos desde el directorio 'public'
-app.use(express.static(path.join(__dirname, '../frontend/public')));
+// Servir archivos estáticos desde el directorio 'dist' del frontend
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
-let db;
-let petsCollection;
-let ownersCollection;
-
-// Conectar a MongoDB
-MongoClient.connect(mongoUri, { useUnifiedTopology: true })
+MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(client => {
     console.log('Connected to MongoDB');
-    db = client.db(dbName);
+    const db = client.db(dbName);
 
-    petsCollection = db.collection('pets');
-    ownersCollection = db.collection('owners');
-
-    // Opcional: Crear índices
-    petsCollection.createIndex({ name: 1 });
-    ownersCollection.createIndex({ email: 1 }, { unique: true });
+    const petsCollection = db.collection('pets');
+    const ownersCollection = db.collection('owners');
 
     // Importar y usar las rutas
     const petsRoutes = require('./routes/pets')(petsCollection);
@@ -39,9 +30,9 @@ MongoClient.connect(mongoUri, { useUnifiedTopology: true })
     app.use('/api/pets', petsRoutes);
     app.use('/api/owners', ownersRoutes);
 
-    // Servir el archivo index.html en la raíz
-    app.get('/', (req, res) => {
-      res.sendFile(path.join(__dirname, '../frontend/public/index.html'));
+    // Manejar cualquier solicitud que no sea de la API
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
     });
 
     // Iniciar el servidor

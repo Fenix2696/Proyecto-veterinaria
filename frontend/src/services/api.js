@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:5000/api';
+// Usamos una ruta relativa en lugar de una URL absoluta
+const API_URL = '/api';
 
 // Obtener todos los propietarios
 export async function getOwners() {
@@ -59,7 +60,16 @@ export async function deleteOwner(ownerId) {
   return response.json();
 }
 
-// Añadir un nuevo pet
+// Obtener todas las mascotas
+export async function getPets() {
+  const response = await fetch(`${API_URL}/pets`);
+  if (!response.ok) {
+    throw new Error('Error fetching pets');
+  }
+  return response.json();
+}
+
+// Añadir una nueva mascota
 export async function addPet(petData) {
   const response = await fetch(`${API_URL}/pets`, {
     method: 'POST',
@@ -70,6 +80,41 @@ export async function addPet(petData) {
   });
   if (!response.ok) {
     throw new Error('Error adding pet');
+  }
+  return response.json();
+}
+
+// Obtener una mascota específica por ID
+export async function getPetById(petId) {
+  const response = await fetch(`${API_URL}/pets/${petId}`);
+  if (!response.ok) {
+    throw new Error('Error fetching pet');
+  }
+  return response.json();
+}
+
+// Actualizar una mascota
+export async function updatePet(petId, petData) {
+  const response = await fetch(`${API_URL}/pets/${petId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(petData),
+  });
+  if (!response.ok) {
+    throw new Error('Error updating pet');
+  }
+  return response.json();
+}
+
+// Eliminar una mascota
+export async function deletePet(petId) {
+  const response = await fetch(`${API_URL}/pets/${petId}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    throw new Error('Error deleting pet');
   }
   return response.json();
 }

@@ -10,7 +10,8 @@ module.exports = (petsCollection) => {
       const pets = await petsCollection.find().toArray();
       res.json(pets);
     } catch (error) {
-      res.status(500).send('Error fetching pets');
+      console.error('Error fetching pets:', error);
+      res.status(500).json({ message: 'Error fetching pets' });
     }
   });
 
@@ -19,9 +20,10 @@ module.exports = (petsCollection) => {
     const petData = req.body;
     try {
       const result = await petsCollection.insertOne(petData);
-      res.status(201).json(result.ops[0]);
+      res.status(201).json({ ...petData, _id: result.insertedId });
     } catch (error) {
-      res.status(500).send('Error adding pet');
+      console.error('Error adding pet:', error);
+      res.status(500).json({ message: 'Error adding pet' });
     }
   });
 
@@ -33,10 +35,11 @@ module.exports = (petsCollection) => {
       if (pet) {
         res.json(pet);
       } else {
-        res.status(404).send('Pet not found');
+        res.status(404).json({ message: 'Pet not found' });
       }
     } catch (error) {
-      res.status(500).send('Error fetching pet');
+      console.error('Error fetching pet:', error);
+      res.status(500).json({ message: 'Error fetching pet' });
     }
   });
 
@@ -52,10 +55,11 @@ module.exports = (petsCollection) => {
       if (result.matchedCount > 0) {
         res.json({ message: 'Pet updated successfully' });
       } else {
-        res.status(404).send('Pet not found');
+        res.status(404).json({ message: 'Pet not found' });
       }
     } catch (error) {
-      res.status(500).send('Error updating pet');
+      console.error('Error updating pet:', error);
+      res.status(500).json({ message: 'Error updating pet' });
     }
   });
 
@@ -67,10 +71,11 @@ module.exports = (petsCollection) => {
       if (result.deletedCount > 0) {
         res.json({ message: 'Pet deleted successfully' });
       } else {
-        res.status(404).send('Pet not found');
+        res.status(404).json({ message: 'Pet not found' });
       }
     } catch (error) {
-      res.status(500).send('Error deleting pet');
+      console.error('Error deleting pet:', error);
+      res.status(500).json({ message: 'Error deleting pet' });
     }
   });
 
