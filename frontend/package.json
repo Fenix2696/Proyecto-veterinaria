@@ -1,12 +1,14 @@
 {
   "name": "veterinaria-frontend",
   "version": "1.0.0",
+  "source": "public/index.html",
   "scripts": {
     "start": "parcel public/index.html",
-    "build": "parcel build public/index.html"
+    "build": "parcel build public/index.html",
+    "postinstall": "npm run build"
   },
   "dependencies": {},
   "devDependencies": {
-    "parcel-bundler": "^1.12.5"
+    "parcel": "^2.9.3"
   }
 }

@@ -1,24 +1,44 @@
 export default class PetList {
-    constructor(pets, onDelete) {
-        this.pets = pets;
+    constructor(onDelete, owners) {
         this.onDelete = onDelete;
+        this.pets = [];
+        this.owners = owners;
     }
 
-    updatePets(newPets) {
-        this.pets = newPets;
+    updatePets(pets) {
+        this.pets = pets;
+    }
+
+    updateOwners(owners) {
+        this.owners = owners;
+    }
+
+    getOwnerName(ownerId) {
+        const owner = this.owners.find(owner => owner._id === ownerId);
+        return owner ? owner.name : 'Propietario desconocido';
     }
 
     render() {
         return `
             <h2>Lista de Mascotas</h2>
-            <ul>
+            <ul id="pet-list">
                 ${this.pets.map(pet => `
                     <li>
-                        ${pet.name} - ${pet.species}
-                        <button onclick="app.deletePet('${pet._id}')">Eliminar</button>
+                        ${pet.name} (Dueño: ${this.getOwnerName(pet.ownerId)})
+                        <button class="delete-pet" data-id="${pet._id}">Eliminar</button>
                     </li>
                 `).join('')}
             </ul>
         `;
+    }
+
+    setupListeners() {
+        const list = document.getElementById('pet-list');
+        list.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-pet')) {
+                const petId = e.target.getAttribute('data-id');
+                this.onDelete(petId);
+            }
+        });
     }
 }

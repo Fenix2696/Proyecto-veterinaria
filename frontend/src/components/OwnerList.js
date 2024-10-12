@@ -1,24 +1,34 @@
 export default class OwnerList {
-    constructor(owners, onDelete) {
-        this.owners = owners;
+    constructor(onDelete) {
         this.onDelete = onDelete;
+        this.owners = [];
     }
 
-    updateOwners(newOwners) {
-        this.owners = newOwners;
+    updateOwners(owners) {
+        this.owners = owners;
     }
 
     render() {
         return `
             <h2>Lista de Propietarios</h2>
-            <ul>
+            <ul id="owner-list">
                 ${this.owners.map(owner => `
                     <li>
-                        ${owner.name} - ${owner.email}
-                        <button onclick="app.deleteOwner('${owner._id}')">Eliminar</button>
+                        ${owner.name} (${owner.email})
+                        <button class="delete-owner" data-id="${owner._id}">Eliminar</button>
                     </li>
                 `).join('')}
             </ul>
         `;
+    }
+
+    setupListeners() {
+        const list = document.getElementById('owner-list');
+        list.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-owner')) {
+                const ownerId = e.target.getAttribute('data-id');
+                this.onDelete(ownerId);
+            }
+        });
     }
 }

@@ -5,11 +5,11 @@ export default class OwnerForm {
 
     render() {
         return `
-            <h2>Añadir Nuevo Propietario</h2>
+            <h2>Agregar Propietario</h2>
             <form id="owner-form">
-                <input type="text" id="owner-name" placeholder="Nombre" required>
-                <input type="email" id="owner-email" placeholder="Email" required>
-                <button type="submit">Añadir Propietario</button>
+                <input type="text" id="owner-name" placeholder="Nombre del propietario" required>
+                <input type="email" id="owner-email" placeholder="Email del propietario" required>
+                <button type="submit">Agregar Propietario</button>
             </form>
         `;
     }
