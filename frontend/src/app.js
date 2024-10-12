@@ -1,11 +1,5 @@
-import PetForm from './components/PetForm.js';
-import PetList from './components/PetList.js';
-import OwnerForm from './components/OwnerForm.js';
-import OwnerList from './components/OwnerList.js';
-
 class App {
     constructor() {
-        this.pets = []; // Aquí guardarás las mascotas
         this.owners = []; // Aquí guardarás los propietarios
         this.init();
     }
@@ -14,54 +8,10 @@ class App {
         // Inicializa la interfaz
         this.render();
         // Configura los formularios
-        this.setupPetForm();
         this.setupOwnerForm();
-        // Carga mascotas y propietarios de la base de datos
-        await this.loadPets();
+        this.setupPetForm();
+        // Carga propietarios de la base de datos
         await this.loadOwners();
-    }
-
-    async loadPets() {
-        const pets = await this.fetchPets();
-        this.petList.updatePets(pets);
-        this.render(); // Para actualizar la lista
-    }
-
-    async fetchPets() {
-        const response = await fetch('http://localhost:5000/api/pets');
-        return response.json();
-    }
-
-    setupPetForm() {
-        const petForm = new PetForm(this.addPet.bind(this));
-        document.getElementById('app').innerHTML += petForm.render();
-        petForm.setupListeners();
-    }
-
-    async addPet(petData) {
-        await fetch('http://localhost:5000/api/pets', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(petData),
-        });
-        await this.loadPets(); // Recargar la lista después de agregar
-    }
-
-    async deletePet(petId) {
-        await fetch(`http://localhost:5000/api/pets/${petId}`, {
-            method: 'DELETE',
-        });
-        await this.loadPets(); // Recargar la lista después de eliminar
-    }
-
-    render() {
-        // Renderiza la lista de mascotas
-        this.petList = new PetList(this.pets, this.deletePet.bind(this));
-        document.getElementById('app').innerHTML += this.petList.render();
-
-        // Renderiza la lista de propietarios
-        this.ownerList = new OwnerList(this.owners, this.deleteOwner.bind(this));
-        document.getElementById('app').innerHTML += this.ownerList.render();
     }
 
     async loadOwners() {
@@ -76,9 +26,14 @@ class App {
     }
 
     setupOwnerForm() {
-        const ownerForm = new OwnerForm(this.addOwner.bind(this));
-        document.getElementById('app').innerHTML += ownerForm.render();
-        ownerForm.setupListeners();
+        const ownerForm = document.getElementById('owner-form');
+        ownerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const ownerName = document.getElementById('ownerName').value;
+            const ownerEmail = document.getElementById('ownerEmail').value;
+            await this.addOwner({ name: ownerName, email: ownerEmail });
+            ownerForm.reset();
+        });
     }
 
     async addOwner(ownerData) {
@@ -90,11 +45,30 @@ class App {
         await this.loadOwners(); // Recargar la lista después de agregar
     }
 
-    async deleteOwner(ownerId) {
-        await fetch(`http://localhost:5000/api/owners/${ownerId}`, {
-            method: 'DELETE',
+    setupPetForm() {
+        const petForm = document.getElementById('pet-form');
+        petForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const petName = document.getElementById('petName').value;
+            const petOwnerId = document.getElementById('petOwnerId').value;
+            await this.addPet({ name: petName, ownerId: petOwnerId });
+            petForm.reset();
         });
-        await this.loadOwners(); // Recargar la lista después de eliminar
+    }
+
+    async addPet(petData) {
+        await fetch('http://localhost:5000/api/pets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(petData),
+        });
+        // Si necesitas cargar las mascotas después de agregar, puedes implementar esta funcionalidad.
+    }
+
+    render() {
+        // Renderiza la lista de propietarios
+        this.ownerList = new OwnerList(this.owners, this.deleteOwner.bind(this));
+        document.getElementById('output').innerHTML = this.ownerList.render();
     }
 }
 
