@@ -5,8 +5,7 @@
   "scripts": {
     "start": "node backend/server.js",
     "build": "cd frontend && npm install && npm run build",
-    "postinstall": "npm run build",
-    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm start\""
+    "postinstall": "npm run build"
   },
   "dependencies": {
     "cors": "^2.8.5",
