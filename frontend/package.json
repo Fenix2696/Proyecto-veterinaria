@@ -7,7 +7,6 @@
     "build": "parcel build public/index.html --public-url ./",
     "postinstall": "npm run build"
   },
-  "dependencies": {},
   "devDependencies": {
     "parcel-bundler": "^1.12.5"
   }
