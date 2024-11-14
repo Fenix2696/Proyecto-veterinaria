@@ -1,4 +1,6 @@
 import { getOwners, addOwner, deleteOwner, getPets, addPet, deletePet } from './services/api.js';
+import { isAuthenticated, logout } from './services/auth.js';
+import Dashboard from './components/Dashboard/Dashboard.js';
 
 class OwnerForm {
     constructor(onSubmit) {
@@ -148,6 +150,13 @@ class PetList {
 
 class App {
     constructor() {
+        if (!isAuthenticated()) {
+            window.location.href = '/login.html';
+            return;
+        }
+
+        this.setupLogoutButton();
+        this.dashboard = new Dashboard();
         this.owners = [];
         this.pets = [];
         this.ownerForm = new OwnerForm(this.handleAddOwner.bind(this));
@@ -155,6 +164,14 @@ class App {
         this.petForm = new PetForm(this.handleAddPet.bind(this), this.owners);
         this.petList = new PetList(this.handleDeletePet.bind(this), this.owners);
         this.init();
+    }
+
+    setupLogoutButton() {
+        const logoutBtn = document.createElement('button');
+        logoutBtn.id = 'logout-btn';
+        logoutBtn.textContent = 'Cerrar Sesión';
+        logoutBtn.onclick = () => logout();
+        document.querySelector('#app').insertBefore(logoutBtn, document.querySelector('#app').firstChild);
     }
 
     async init() {
@@ -218,7 +235,7 @@ class App {
         try {
             await deleteOwner(ownerId);
             await this.loadOwners();
-            await this.loadPets(); // Recargar mascotas en caso de que se hayan eliminado algunas
+            await this.loadPets();
             this.showSuccess('Propietario eliminado exitosamente');
         } catch (error) {
             console.error('Error deleting owner:', error);
@@ -259,5 +276,7 @@ class App {
 
 // Inicializar la aplicación cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
-    window.app = new App();
+    new App();
 });
+
+export default App;

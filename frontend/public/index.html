@@ -2,22 +2,30 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veterinaria App</title>
+    <title>Veterinaria</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="app">
-        <h1>Bienvenido a la Veterinaria</h1>
+        <nav class="navbar">
+            <h1>Veterinaria</h1>
+            <button id="logout-btn">Cerrar Sesión</button>
+        </nav>
+
+        <!-- Contenedor del Dashboard -->
+        <div id="dashboard-container"></div>
+
         <div id="owner-section">
             <div id="owner-form-container"></div>
             <div id="owner-list-container"></div>
         </div>
+
         <div id="pet-section">
             <div id="pet-form-container"></div>
             <div id="pet-list-container"></div>
         </div>
     </div>
-    <script type="module" src="../src/app.js"></script>
+    
+    <script src="../src/app.js" type="module"></script>
 </body>
 </html>

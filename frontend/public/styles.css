@@ -1,3 +1,4 @@
+/* Estilos generales */
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
@@ -28,11 +29,15 @@ h2 {
     margin-bottom: 30px;
 }
 
+/* Formularios */
 form {
     margin-bottom: 20px;
 }
 
-input[type="text"], input[type="email"], select {
+input[type="text"], 
+input[type="email"], 
+input[type="password"],
+select {
     width: 100%;
     padding: 8px;
     margin-bottom: 10px;
@@ -53,6 +58,7 @@ button:hover {
     background-color: #4cae4c;
 }
 
+/* Listas */
 ul {
     list-style-type: none;
     padding: 0;
@@ -74,4 +80,98 @@ li {
 
 .delete-owner:hover, .delete-pet:hover {
     background-color: #c9302c;
+}
+
+/* Estilos del Login */
+.login-container {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.error-message {
+    color: red;
+    text-align: center;
+    display: none;
+    margin-top: 10px;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+#logout-btn {
+    background-color: #d9534f;
+    padding: 8px 16px;
+}
+
+#logout-btn:hover {
+    background-color: #c9302c;
+}
+
+/* Dashboard */
+.dashboard-container {
+    padding: 20px;
+    margin-bottom: 30px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.stat-card h3 {
+    color: #333;
+    margin: 0 0 10px 0;
+}
+
+.stat-number {
+    font-size: 24px;
+    color: #5cb85c;
+    margin: 0;
+    font-weight: bold;
+}
+
+/* Responsividad */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    #app {
+        padding: 10px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .navbar {
+        flex-direction: column;
+        gap: 10px;
+    }
 }
