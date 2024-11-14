@@ -1,28 +1,20 @@
-// frontend/src/components/Login.js
 class Login {
   constructor() {
-      // Evitar múltiples instancias
-      if (localStorage.getItem('token')) {
-          window.location.href = '/index.html';
-          return;
-      }
+      this.form = document.getElementById('login-form');
+      this.errorMessage = document.getElementById('error-message');
       this.setupListeners();
   }
 
   setupListeners() {
-      const form = document.getElementById('login-form');
-      if (!form) return; // Evitar errores si el formulario no existe
-
-      form.removeEventListener('submit', this.handleSubmit); // Remover listener previo
-      form.addEventListener('submit', this.handleSubmit);
+      this.form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          await this.handleLogin();
+      });
   }
 
-  async handleSubmit(e) {
-      e.preventDefault();
-      
-      const username = document.getElementById('username').value;
+  async handleLogin() {
+      const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      const errorMsg = document.getElementById('error-message');
 
       try {
           const response = await fetch('https://proyecto-veterinaria-uf7y.onrender.com/api/auth/login', {
@@ -30,24 +22,25 @@ class Login {
               headers: {
                   'Content-Type': 'application/json'
               },
-              body: JSON.stringify({ username, password })
+              body: JSON.stringify({ email, password })
           });
 
+          const data = await response.json();
+
           if (!response.ok) {
-              throw new Error('Credenciales inválidas');
+              throw new Error(data.message || 'Error al iniciar sesión');
           }
 
-          const data = await response.json();
           localStorage.setItem('token', data.token);
-          window.location.href = '/index.html';
+          window.location.href = 'index.html';
       } catch (error) {
-          errorMsg.style.display = 'block';
-          errorMsg.textContent = 'Usuario o contraseña incorrectos';
+          this.errorMessage.textContent = error.message;
+          this.errorMessage.style.display = 'block';
       }
   }
 }
 
-// Solo inicializar si estamos en la página de login
+// Inicializar solo si estamos en la página de login
 if (document.getElementById('login-form')) {
   new Login();
 }
