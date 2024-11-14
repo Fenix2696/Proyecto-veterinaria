@@ -1,55 +1,34 @@
-// backend/routes/auth.js
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');
 
-// Login
+// Login simplificado sin bcrypt
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await User.findOne({ username });
     
-    if (!user) {
-      return res.status(400).json({ message: 'Usuario no encontrado' });
+    // Usuario hardcodeado para pruebas
+    if (username === "admin" && password === "admin123") {
+      const token = jwt.sign(
+        { id: '1', role: 'admin' },
+        process.env.JWT_SECRET || 'veterinaria-secret',
+        { expiresIn: '24h' }
+      );
+
+      res.json({
+        token,
+        user: { 
+          id: '1', 
+          username: 'admin', 
+          role: 'admin' 
+        }
+      });
+    } else {
+      res.status(401).json({ message: 'Credenciales inválidas' });
     }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Contraseña incorrecta' });
-    }
-
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-
-    res.json({ token, user: { id: user._id, username, role: user.role } });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Error en el servidor' });
-  }
-});
-
-// Registro (opcional, para crear usuarios)
-router.post('/register', async (req, res) => {
-  try {
-    const { username, password, name, email, role } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    const user = new User({
-      username,
-      password: hashedPassword,
-      name,
-      email,
-      role
-    });
-
-    await user.save();
-    res.status(201).json({ message: 'Usuario creado exitosamente' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error al crear usuario' });
   }
 });
 
