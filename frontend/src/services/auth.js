@@ -1,32 +1,38 @@
-const API_URL = 'https://proyecto-veterinaria-uf7y.onrender.com/api';
-
-export const login = async (credentials) => {
-    try {
-        const response = await fetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(credentials)
-        });
-
-        if (!response.ok) throw new Error('Login failed');
-        
-        const data = await response.json();
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        return data;
-    } catch (error) {
-        throw new Error('Error en login');
-    }
+// frontend/src/services/auth.js
+export const loginUser = async (credentials) => {
+  const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials)
+  });
+  
+  if (!response.ok) {
+      throw new Error('Error en la autenticación');
+  }
+  
+  const data = await response.json();
+  localStorage.setItem('token', data.token);
+  return data;
 };
 
-export const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login.html';
-};
+export const verifyToken = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+      throw new Error('No token found');
+  }
 
-export const isAuthenticated = () => {
-    return !!localStorage.getItem('token');
+  const response = await fetch('/api/auth/verify', {
+      headers: {
+          'Authorization': `Bearer ${token}`
+      }
+  });
+
+  if (!response.ok) {
+      localStorage.removeItem('token');
+      throw new Error('Token inválido');
+  }
+
+  return await response.json();
 };
