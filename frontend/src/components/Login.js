@@ -1,29 +1,55 @@
-import { login } from '../services/auth.js';
-
+// frontend/src/components/Login.js
 class Login {
-    constructor() {
-        this.setupListeners();
-    }
+  constructor() {
+      // Evitar múltiples instancias
+      if (localStorage.getItem('token')) {
+          window.location.href = '/index.html';
+          return;
+      }
+      this.setupListeners();
+  }
 
-    setupListeners() {
-        const loginForm = document.getElementById('login-form');
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+  setupListeners() {
+      const form = document.getElementById('login-form');
+      if (!form) return; // Evitar errores si el formulario no existe
 
-            try {
-                await login({ username, password });
-                window.location.href = '/index.html';
-            } catch (error) {
-                document.getElementById('error-message').style.display = 'block';
-            }
-        });
-    }
+      form.removeEventListener('submit', this.handleSubmit); // Remover listener previo
+      form.addEventListener('submit', this.handleSubmit);
+  }
+
+  async handleSubmit(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errorMsg = document.getElementById('error-message');
+
+      try {
+          const response = await fetch('https://proyecto-veterinaria-uf7y.onrender.com/api/auth/login', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ username, password })
+          });
+
+          if (!response.ok) {
+              throw new Error('Credenciales inválidas');
+          }
+
+          const data = await response.json();
+          localStorage.setItem('token', data.token);
+          window.location.href = '/index.html';
+      } catch (error) {
+          errorMsg.style.display = 'block';
+          errorMsg.textContent = 'Usuario o contraseña incorrectos';
+      }
+  }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    new Login();
-});
+// Solo inicializar si estamos en la página de login
+if (document.getElementById('login-form')) {
+  new Login();
+}
 
 export default Login;
