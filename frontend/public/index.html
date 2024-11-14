@@ -1,31 +1,52 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Veterinaria</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="app">
-        <nav class="navbar">
+        <div class="navbar">
             <h1>Veterinaria</h1>
             <button id="logout-btn">Cerrar Sesión</button>
-        </nav>
-
-        <!-- Contenedor del Dashboard -->
-        <div id="dashboard-container"></div>
+        </div>
 
         <div id="owner-section">
-            <div id="owner-form-container"></div>
-            <div id="owner-list-container"></div>
+            <div id="owner-form-container">
+                <h2>Agregar Propietario</h2>
+                <form id="owner-form">
+                    <input type="text" id="owner-name" placeholder="Nombre del propietario" required>
+                    <input type="email" id="owner-email" placeholder="Email del propietario" required>
+                    <button type="submit">Agregar Propietario</button>
+                </form>
+            </div>
+            <div id="owner-list-container">
+                <h2>Lista de Propietarios</h2>
+                <ul id="owner-list"></ul>
+            </div>
         </div>
 
         <div id="pet-section">
-            <div id="pet-form-container"></div>
-            <div id="pet-list-container"></div>
+            <div id="pet-form-container">
+                <h2>Agregar Mascota</h2>
+                <form id="pet-form">
+                    <input type="text" id="pet-name" placeholder="Nombre de la mascota" required>
+                    <select id="pet-owner" required>
+                        <option value="">Seleccione un propietario</option>
+                    </select>
+                    <button type="submit">Agregar Mascota</button>
+                </form>
+            </div>
+            <div id="pet-list-container">
+                <h2>Lista de Mascotas</h2>
+                <ul id="pet-list"></ul>
+            </div>
         </div>
     </div>
-    
-    <script src="../src/app.js" type="module"></script>
+
+    <script src="../src/script.js"></script>
 </body>
 </html>
