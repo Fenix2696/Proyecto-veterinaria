@@ -2,6 +2,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { ObjectId } = require('mongodb');
 
 module.exports = (usersCollection) => {
     const router = express.Router();
@@ -10,25 +11,34 @@ module.exports = (usersCollection) => {
     router.post('/login', async (req, res) => {
         try {
             const { email, password } = req.body;
+            console.log('Intento de login para:', email); // Log para debugging
 
             // Buscar usuario por email
             const user = await usersCollection.findOne({ email });
             if (!user) {
+                console.log('Usuario no encontrado:', email);
                 return res.status(401).json({ message: 'Credenciales inválidas' });
             }
 
             // Verificar contraseña
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) {
+                console.log('Contraseña incorrecta para:', email);
                 return res.status(401).json({ message: 'Credenciales inválidas' });
             }
 
             // Crear token
             const token = jwt.sign(
-                { userId: user._id },
+                { 
+                    userId: user._id,
+                    email: user.email,
+                    role: user.role 
+                },
                 process.env.JWT_SECRET,
                 { expiresIn: '24h' }
             );
+
+            console.log('Login exitoso para:', email);
 
             res.json({
                 token,
@@ -55,7 +65,7 @@ module.exports = (usersCollection) => {
             }
 
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            const user = await usersCollection.findOne({ _id: decoded.userId });
+            const user = await usersCollection.findOne({ _id: new ObjectId(decoded.userId) });
 
             if (!user) {
                 return res.status(401).json({ message: 'Usuario no encontrado' });
@@ -64,60 +74,12 @@ module.exports = (usersCollection) => {
             const { password, ...userData } = user;
             res.json({ user: userData });
         } catch (error) {
+            console.error('Error en verificación de token:', error);
             res.status(401).json({ message: 'Token inválido' });
         }
     });
 
-    return router;
-};
-
-// routes/users.js
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const { ObjectId } = require('mongodb');
-
-module.exports = (usersCollection) => {
-    const router = express.Router();
-
-    // Middleware para verificar token
-    const auth = async (req, res, next) => {
-        try {
-            const token = req.header('Authorization')?.replace('Bearer ', '');
-            
-            if (!token) {
-                return res.status(401).json({ message: 'No autorizado' });
-            }
-
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            const user = await usersCollection.findOne({ _id: new ObjectId(decoded.userId) });
-
-            if (!user) {
-                return res.status(401).json({ message: 'Usuario no encontrado' });
-            }
-
-            req.user = user;
-            next();
-        } catch (error) {
-            res.status(401).json({ message: 'Token inválido' });
-        }
-    };
-
-    // Obtener todos los usuarios (protegido)
-    router.get('/', auth, async (req, res) => {
-        try {
-            const users = await usersCollection.find({}).toArray();
-            // Eliminar las contraseñas antes de enviar
-            const usersWithoutPasswords = users.map(user => {
-                const { password, ...userWithoutPassword } = user;
-                return userWithoutPassword;
-            });
-            res.json(usersWithoutPasswords);
-        } catch (error) {
-            res.status(500).json({ message: 'Error al obtener usuarios' });
-        }
-    });
-
-    // Registrar un nuevo usuario
+    // Registro de usuario
     router.post('/register', async (req, res) => {
         try {
             const { email, password, name, role = 'veterinario' } = req.body;
@@ -141,57 +103,78 @@ module.exports = (usersCollection) => {
                 createdAt: new Date()
             });
 
+            console.log('Usuario registrado:', email);
+
             res.status(201).json({ 
                 message: 'Usuario creado exitosamente',
                 userId: result.insertedId
             });
         } catch (error) {
-            console.error('Error al registrar usuario:', error);
+            console.error('Error en registro:', error);
             res.status(500).json({ message: 'Error al crear usuario' });
         }
     });
 
-    // Actualizar usuario
-    router.put('/:id', auth, async (req, res) => {
+    // Cambiar contraseña
+    router.post('/change-password', async (req, res) => {
         try {
-            const { password, ...updateData } = req.body;
-            const userId = req.params.id;
-
-            // Si se proporciona una nueva contraseña, encriptarla
-            if (password) {
-                const salt = await bcrypt.genSalt(10);
-                updateData.password = await bcrypt.hash(password, salt);
+            const token = req.header('Authorization')?.replace('Bearer ', '');
+            if (!token) {
+                return res.status(401).json({ message: 'No autorizado' });
             }
 
-            const result = await usersCollection.updateOne(
-                { _id: new ObjectId(userId) },
-                { $set: updateData }
-            );
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const { currentPassword, newPassword } = req.body;
 
-            if (result.matchedCount === 0) {
+            const user = await usersCollection.findOne({ _id: new ObjectId(decoded.userId) });
+            if (!user) {
                 return res.status(404).json({ message: 'Usuario no encontrado' });
             }
 
-            res.json({ message: 'Usuario actualizado exitosamente' });
+            // Verificar contraseña actual
+            const isMatch = await bcrypt.compare(currentPassword, user.password);
+            if (!isMatch) {
+                return res.status(401).json({ message: 'Contraseña actual incorrecta' });
+            }
+
+            // Encriptar nueva contraseña
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+            // Actualizar contraseña
+            await usersCollection.updateOne(
+                { _id: new ObjectId(decoded.userId) },
+                { $set: { password: hashedPassword } }
+            );
+
+            res.json({ message: 'Contraseña actualizada exitosamente' });
         } catch (error) {
-            res.status(500).json({ message: 'Error al actualizar usuario' });
+            console.error('Error al cambiar contraseña:', error);
+            res.status(500).json({ message: 'Error al cambiar contraseña' });
         }
     });
 
-    // Eliminar usuario
-    router.delete('/:id', auth, async (req, res) => {
-        try {
-            const result = await usersCollection.deleteOne({
-                _id: new ObjectId(req.params.id)
-            });
+    // Logout (opcional, ya que el token se maneja del lado del cliente)
+    router.post('/logout', (req, res) => {
+        res.json({ message: 'Sesión cerrada exitosamente' });
+    });
 
-            if (result.deletedCount === 0) {
+    // Recuperación de contraseña (envío de email)
+    router.post('/forgot-password', async (req, res) => {
+        try {
+            const { email } = req.body;
+            const user = await usersCollection.findOne({ email });
+
+            if (!user) {
                 return res.status(404).json({ message: 'Usuario no encontrado' });
             }
 
-            res.json({ message: 'Usuario eliminado exitosamente' });
+            // Aquí irían las funciones para enviar email de recuperación
+            // Por ahora solo enviamos una respuesta exitosa
+            res.json({ message: 'Si el email existe, recibirás instrucciones para recuperar tu contraseña' });
         } catch (error) {
-            res.status(500).json({ message: 'Error al eliminar usuario' });
+            console.error('Error en recuperación de contraseña:', error);
+            res.status(500).json({ message: 'Error en el servidor' });
         }
     });
 
