@@ -1,112 +1,102 @@
-// backend/routes/users.js
 const express = require('express');
-const router = express.Router();
 const bcrypt = require('bcryptjs');
-const User = require('../models/user');
+const { ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth');
-const { body, validationResult } = require('express-validator');
 
-// Obtener todos los usuarios (protegido, solo admin)
-router.get('/', auth, async (req, res) => {
-    if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'No autorizado' });
-    }
-    try {
-        const users = await User.find().select('-password');
-        res.json(users);
-    } catch (error) {
-        res.status(500).json({ message: 'Error al obtener usuarios' });
-    }
-});
+module.exports = (usersCollection) => {
+    const router = express.Router();
 
-// Registrar un nuevo usuario con validaciones
-router.post(
-    '/register',
-    [
-        body('username').isLength({ min: 3 }).withMessage('Username debe tener al menos 3 caracteres'),
-        body('password').isLength({ min: 6 }).withMessage('Password debe tener al menos 6 caracteres'),
-        body('email').isEmail().withMessage('Email inválido'),
-        body('role').optional().isIn(['admin', 'veterinario']).withMessage('Role inválido')
-    ],
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
+    // Obtener todos los usuarios
+    router.get('/', auth, async (req, res) => {
         try {
-            const { username, password, email, name, role } = req.body;
+            const users = await usersCollection.find({}).toArray();
+            const usersWithoutPasswords = users.map(user => {
+                const { password, ...userWithoutPassword } = user;
+                return userWithoutPassword;
+            });
+            res.json(usersWithoutPasswords);
+        } catch (error) {
+            console.error('Error getting users:', error);
+            res.status(500).json({ message: 'Error al obtener usuarios' });
+        }
+    });
 
-            let user = await User.findOne({ email });
-            if (user) {
+    // Registrar nuevo usuario
+    router.post('/register', async (req, res) => {
+        try {
+            const { email, password, name } = req.body;
+
+            const existingUser = await usersCollection.findOne({ email });
+            if (existingUser) {
                 return res.status(400).json({ message: 'El usuario ya existe' });
             }
 
-            user = new User({
-                username,
-                password,
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+
+            const result = await usersCollection.insertOne({
                 email,
+                password: hashedPassword,
                 name,
-                role: role || 'veterinario'
+                role: 'veterinario',
+                createdAt: new Date()
             });
 
-            const salt = await bcrypt.genSalt(10);
-            user.password = await bcrypt.hash(password, salt);
-
-            await user.save();
-            res.status(201).json({ message: 'Usuario creado exitosamente' });
+            res.status(201).json({ 
+                message: 'Usuario creado exitosamente',
+                userId: result.insertedId 
+            });
         } catch (error) {
-            console.error('Error al registrar usuario:', error);
+            console.error('Error registering user:', error);
             res.status(500).json({ message: 'Error al crear usuario' });
         }
-    }
-);
+    });
 
-// Actualizar usuario con protección de roles
-router.put('/:id', auth, async (req, res) => {
-    const { password, ...updateData } = req.body;
+    // Actualizar usuario
+    router.put('/:id', auth, async (req, res) => {
+        try {
+            const { password, ...updateData } = req.body;
+            const userId = req.params.id;
 
-    // Permitir que el usuario admin o el usuario mismo puedan actualizar
-    if (req.user.role !== 'admin' && req.user.id !== req.params.id) {
-        return res.status(403).json({ message: 'No autorizado para actualizar este usuario' });
-    }
+            if (password) {
+                const salt = await bcrypt.genSalt(10);
+                updateData.password = await bcrypt.hash(password, salt);
+            }
 
-    try {
-        if (password) {
-            const salt = await bcrypt.genSalt(10);
-            updateData.password = await bcrypt.hash(password, salt);
+            const result = await usersCollection.updateOne(
+                { _id: new ObjectId(userId) },
+                { $set: updateData }
+            );
+
+            if (result.matchedCount === 0) {
+                return res.status(404).json({ message: 'Usuario no encontrado' });
+            }
+
+            res.json({ message: 'Usuario actualizado exitosamente' });
+        } catch (error) {
+            console.error('Error updating user:', error);
+            res.status(500).json({ message: 'Error al actualizar usuario' });
         }
+    });
 
-        const user = await User.findByIdAndUpdate(
-            req.params.id,
-            updateData,
-            { new: true }
-        ).select('-password');
+    // Eliminar usuario
+    router.delete('/:id', auth, async (req, res) => {
+        try {
+            const result = await usersCollection.deleteOne({
+                _id: new ObjectId(req.params.id)
+            });
 
-        if (!user) {
-            return res.status(404).json({ message: 'Usuario no encontrado' });
+            if (result.deletedCount === 0) {
+                return res.status(404).json({ message: 'Usuario no encontrado' });
+            }
+
+            res.json({ message: 'Usuario eliminado exitosamente' });
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            res.status(500).json({ message: 'Error al eliminar usuario' });
         }
+    });
 
-        res.json(user);
-    } catch (error) {
-        res.status(500).json({ message: 'Error al actualizar usuario' });
-    }
-});
-
-// Eliminar usuario solo si el rol es admin
-router.delete('/:id', auth, async (req, res) => {
-    if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'No autorizado para eliminar usuarios' });
-    }
-    try {
-        const user = await User.findByIdAndDelete(req.params.id);
-        if (!user) {
-            return res.status(404).json({ message: 'Usuario no encontrado' });
-        }
-        res.json({ message: 'Usuario eliminado exitosamente' });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al eliminar usuario' });
-    }
-});
-
-module.exports = router;
+    return router;
+};

@@ -1,30 +1,57 @@
-// backend/server.js
-require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
-const helmet = require('helmet');
-const compression = require('compression');
+const { MongoClient } = require('mongodb');
+const path = require('path');
+require('dotenv').config();
 
 const app = express();
-const usersRouter = require('./routes/users');
 
-// Middlewares
+// Middleware
+app.use(cors({
+    origin: ['https://proyecto-veterinaria-uf7y.onrender.com', 'http://localhost:3000']
+}));
 app.use(express.json());
-app.use(cors());
-app.use(helmet());
-app.use(compression());
 
-// Rutas
-app.use('/api/users', usersRouter);
+// Configuración MongoDB
+const mongoUri = process.env.MONGODB_URI;
+const dbName = process.env.MONGODB_DB || 'veterinaria';
 
-// Conexión a MongoDB
-mongoose.connect(process.env.DB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => console.log('Conectado a MongoDB'))
-.catch(err => console.error('Error al conectar a MongoDB:', err));
+MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(client => {
+        console.log('Connected to MongoDB');
+        const db = client.db(dbName);
 
-// Iniciar servidor
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
+        // Inicializar colecciones
+        const usersCollection = db.collection('users');
+        const ownersCollection = db.collection('owners');
+        const petsCollection = db.collection('pets');
+
+        // Configurar rutas con las colecciones
+        const authRouter = require('./routes/auth')(usersCollection);
+        const usersRouter = require('./routes/users')(usersCollection);
+        const ownersRouter = require('./routes/owners')(ownersCollection);
+        const petsRouter = require('./routes/pets')(petsCollection);
+
+        // Usar las rutas
+        app.use('/api/auth', authRouter);
+        app.use('/api/users', usersRouter);
+        app.use('/api/owners', ownersRouter);
+        app.use('/api/pets', petsRouter);
+
+        // Servir archivos estáticos
+        app.use(express.static(path.join(__dirname, '../frontend/public')));
+
+        // Ruta catch-all para SPA
+        app.get('*', (req, res) => {
+            res.sendFile(path.join(__dirname, '../frontend/public/index.html'));
+        });
+
+        const PORT = process.env.PORT || 5000;
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    })
+    .catch(error => {
+        console.error('Error connecting to MongoDB:', error);
+        process.exit(1);
+    });
