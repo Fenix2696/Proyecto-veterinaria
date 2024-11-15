@@ -3,7 +3,9 @@ const cors = require('cors');
 const { MongoClient } = require('mongodb');
 const path = require('path');
 require('dotenv').config();
-
+// En server.js
+const dashboardRouter = require('./routes/dashboard')(db);
+app.use('/api/dashboard', dashboardRouter);
 const app = express();
 
 // Middleware

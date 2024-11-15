@@ -154,13 +154,13 @@ li {
     background-color: #c9302c;
 }
 
-/* Dashboard */
+/* Estilos del dashboard */
 .dashboard-container {
-    margin-bottom: 30px;
     padding: 20px;
-    background-color: white;
+    background: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
 }
 
 .stats-grid {
@@ -175,44 +175,60 @@ li {
     padding: 20px;
     border-radius: 8px;
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.stat-card h3 {
-    margin: 0 0 10px 0;
-    color: #666;
-    font-size: 1.1em;
 }
 
 .stat-number {
     font-size: 2em;
     color: #5cb85c;
-    margin: 0;
     font-weight: bold;
 }
 
-/* Responsividad */
-@media (max-width: 600px) {
-    body {
-        padding: 10px;
-    }
+/* Estilos para formularios y listas */
+.form-group {
+    margin-bottom: 15px;
+}
 
-    #app {
-        padding: 10px;
-    }
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
 
-    .navbar {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-    }
+.btn-primary {
+    background-color: #5cb85c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
 
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
+.btn-primary:hover {
+    background-color: #4cae4c;
+}
 
-    .login-container {
-        margin: 20px auto;
-        padding: 20px;
-    }
+/* Estilos de navegación */
+.navbar {
+    background-color: #333;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#logout-btn {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#logout-btn:hover {
+    background-color: #c9302c;
 }
