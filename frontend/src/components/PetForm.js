@@ -1,15 +1,25 @@
 export default class PetForm {
-    constructor(onSubmit) {
+    constructor(onSubmit, owners) {
         this.onSubmit = onSubmit;
+        this.owners = owners;
+    }
+
+    updateOwners(owners) {
+        this.owners = owners;
     }
 
     render() {
         return `
-            <h2>Añadir Nueva Mascota</h2>
+            <h2>Agregar Mascota</h2>
             <form id="pet-form">
-                <input type="text" id="pet-name" placeholder="Nombre" required>
-                <input type="text" id="pet-species" placeholder="Especie" required>
-                <button type="submit">Añadir Mascota</button>
+                <input type="text" id="pet-name" placeholder="Nombre de la mascota" required>
+                <select id="pet-owner" required>
+                    <option value="">Seleccione un propietario</option>
+                    ${this.owners.map(owner => `
+                        <option value="${owner._id}">${owner.name}</option>
+                    `).join('')}
+                </select>
+                <button type="submit">Agregar Mascota</button>
             </form>
         `;
     }
@@ -19,8 +29,8 @@ export default class PetForm {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             const name = document.getElementById('pet-name').value;
-            const species = document.getElementById('pet-species').value;
-            this.onSubmit({ name, species });
+            const ownerId = document.getElementById('pet-owner').value;
+            this.onSubmit({ name, ownerId });
             form.reset();
         });
     }

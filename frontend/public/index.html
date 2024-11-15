@@ -3,13 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veterinaria App</title>
+    <title>Veterinaria</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="app">
-        <!-- El contenido se cargará dinámicamente aquí -->
+        <div class="navbar">
+            <h1>Veterinaria</h1>
+            <button id="logout-btn">Cerrar Sesión</button>
+        </div>
+
+        <div id="dashboard-container" class="dashboard-container">
+            <h2>Panel de Control</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Mascotas</h3>
+                    <p id="total-pets" class="stat-number">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Propietarios</h3>
+                    <p id="total-owners" class="stat-number">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="owner-section">
+            <h2>Agregar Propietario</h2>
+            <form id="owner-form">
+                <div class="form-group">
+                    <input type="text" id="owner-name" placeholder="Nombre del propietario" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="owner-email" placeholder="Email del propietario" required>
+                </div>
+                <button type="submit" class="btn-primary">Agregar Propietario</button>
+            </form>
+
+            <h2>Lista de Propietarios</h2>
+            <ul id="owner-list"></ul>
+        </div>
+
+        <div id="pet-section">
+            <h2>Agregar Mascota</h2>
+            <form id="pet-form">
+                <div class="form-group">
+                    <input type="text" id="pet-name" placeholder="Nombre de la mascota" required>
+                </div>
+                <div class="form-group">
+                    <select id="pet-owner" required>
+                        <option value="">Seleccione un propietario</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Agregar Mascota</button>
+            </form>
+
+            <h2>Lista de Mascotas</h2>
+            <ul id="pet-list"></ul>
+        </div>
     </div>
-    <script src="../src/app.js" type="module"></script>
+
+    <script type="module" src="../src/services/api.js"></script>
+    <script type="module" src="../src/script.js"></script>
 </body>
 </html>
